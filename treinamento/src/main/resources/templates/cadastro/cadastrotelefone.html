@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Pagina Spring</title>
+
+	<!--Import Google Icon Font-->
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<!-- Compiled and minified CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">   
+
+</head>
+
+<body>
+	
+	<br/>
+	
+	<a href="/cadastropessoa" class="waves-effect waves-light btn">Voltar</a>
+
+	<br/>
+
+	<h4>Pessoa</h4>		
+	<div th:each="p : ${Pessoa}">
+		<div class="row">
+			<p>ID: <span th:text="${p.id}"/></p>
+			<p>Nome: <span th:text="${p.nome}"/> <span th:text="${p.sobrenome}"/></p>
+			<p>Idade: <span th:text="${p.idade}"/></p>
+		</div>
+	</div>
+	
+	<br/>
+	<div class="row">
+		<div th:each = "msgErro : ${msgErros}">
+			<span th:text = "${msgErro}" />
+		</div>		
+	</div>
+	
+	<h4>Telefones</h4>	
+	<div class="row">
+		<form method="POST" th:action="@{/salvarTelefone/{pessoaId}(pessoaId=${Pessoa.id})}" class="col s12" th:object="${Telefone}" onsubmit="return validaFormulario() ? true : false">
+			<div class="row">
+				<div class="input-fild col s1">
+					<label for="numero">ID: </label>
+					<input type="text" name="id" readonly>
+				</div>
+				<div class="input-fild col s6">
+					<label for="numero">Númnero: </label>
+					<input type="text" name="numero" th:field="*{numero}">
+				</div>
+				<div class="input-fild col s5">
+					<label for="numero">Tipo: </label>
+					<input type="text" name="tipo" th:field="*{tipo}">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col s12">
+					<input type="submit" value="Adicionar" class="waves-effect waves-light btn"/>
+				</div>		
+			</div>
+		</form>
+	</div>
+	
+	<div class="row">
+		<div class="input-field col s8">
+			<table class="highlight">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Número</th>
+						<th>Tipo</th>
+						<th>Excluir</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="telefone : ${telefones}">
+						<td th:text="${telefone.id}"></td>
+						<td th:text="${telefone.numero}"></td>
+						<td th:text="${telefone.tipo}"></td>
+						<td><a th:href="@{/excluirTelefone/{idTelefone}(idTelefone=${telefone.id})}" class="waves-effect waves-light btn">Excluir</a></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		function validaFormulario(){
+			var numero = document.getElementById("numero").value;
+			var tipo = document.getElementById("tipo").value;
+			
+			if (numero === ''){
+				alert('Número é campo de preenchimento obrigatório!')
+				return false
+			}else if(tipo === ''){
+				alert('Tipo é campo de preenchimento obrigatório!')
+				return false
+			}
+			
+			return true
+		}
+	
+	</script>
+	
+	<!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>	
+</body>
+
+</html>

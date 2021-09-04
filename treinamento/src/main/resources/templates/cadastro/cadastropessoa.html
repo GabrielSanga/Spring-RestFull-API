@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Pagina Spring</title>
+	
+	<!-- JQUERY -->
+	<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+  
+	<!--Import Google Icon Font-->
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<!-- Compiled and minified CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+	
+	<style>
+	
+	table td, table th{
+		border: 1px grey;
+	}
+	
+	table th{
+		background: #eee;
+	}
+	
+	</style>
+	
+	<script>
+        $(document).ready(function() {
+	
+			$("#dataNascimento").datepicker({
+				autoClose:true,
+				showOthermonths:true,
+				format: 'yyyy-mm-dd'
+			});
+
+            function limpa_formulário_cep() {
+                // Limpa valores do formulário de cep.
+                $("#rua").val("");
+                $("#bairro").val("");
+                $("#cidade").val("");
+                $("#uf").val("");
+                $("#ibge").val("");
+            }
+            
+            //Quando o campo cep perde o foco.
+            $("#cep").blur(function() {
+
+                //Nova variável "cep" somente com dígitos.
+                var cep = $(this).val().replace(/\D/g, '');
+
+                //Verifica se campo cep possui valor informado.
+                if (cep != "") {
+
+                    //Expressão regular para validar o CEP.
+                    var validacep = /^[0-9]{8}$/;
+
+                    //Valida o formato do CEP.
+                    if(validacep.test(cep)) {
+
+                        //Preenche os campos com "..." enquanto consulta webservice.
+                        $("#rua").val("...");
+                        $("#bairro").val("...");
+                        $("#cidade").val("...");
+                        $("#uf").val("...");
+                        $("#ibge").val("...");
+
+                        //Consulta o webservice viacep.com.br/
+                        $.getJSON("https://viacep.com.br/ws/"+ cep +"/json/?callback=?", function(dados) {
+
+                            if (!("erro" in dados)) {
+                                //Atualiza os campos com os valores da consulta.
+                                $("#rua").val(dados.logradouro);
+                                $("#bairro").val(dados.bairro);
+                                $("#cidade").val(dados.localidade);
+                                $("#uf").val(dados.uf);
+                                $("#ibge").val(dados.ibge);
+                            }
+                            else {
+                                //CEP pesquisado não foi encontrado.
+                                limpa_formulário_cep();
+                                alert("CEP não encontrado.");
+                            }
+                        });
+                    }
+                    else {
+                        //cep é inválido.
+                        limpa_formulário_cep();
+                        alert("Formato de CEP inválido.");
+                    }
+                }
+                else {
+                    //cep sem valor, limpa formulário.
+                    limpa_formulário_cep();
+                }
+            });
+        });
+        
+        //Combo Sexo
+       	document.addEventListener('DOMContentLoaded', function() {
+			var elems = document.querySelectorAll('select');
+		    var instances = M.FormSelect.init(elems, options);
+		});			
+		$(document).ready(function(){
+		    $('select').formSelect();
+		});
+
+    </script>   
+</head>
+
+<body>
+	<br>
+		
+	<div class="row">
+		<a href="/logout" class="waves-effect waves-light btn">Logout</a>
+		<a class="waves-effect waves-light btn" href="/">Voltar</a>
+	</div>
+	
+	<div class="row">
+		<div th:each = "msgErro : ${msgErros}">
+			<span th:text = "${msgErro}" />
+		</div>		
+	</div>
+	
+	<fieldset>
+		<legend>Cadastro</legend>
+		<div class="row">
+			<form class="col s12" action="salvarpessoa" method="POST" th:object="${Pessoa}" enctype="multipart/form-data">
+				<div class="row">
+					<div class="col s2">
+					    <label for="last_name">ID:</label>
+						<input name="id" type="text" class="validate" th:field="*{id}" readonly>			
+					</div>			
+					<div class="col s10">
+						<label for="last_name">Nome:</label>
+						<input name="nome" placeholder="Informe o nome." type="text" class="validate" th:field="*{nome}">			
+					</div>
+				</div>
+				<div class="row">
+					<div class="col s6">
+						<label for="last_name">Sobrenome:</label>
+						<input name="sobrenome" placeholder="Informe o sobrenome." type="text" class="validate" th:field="*{sobrenome}">			
+					</div>
+					<div class="col s4">
+						<label for="last_name">Data Nascimento:</label>
+						<input name="dataNascimento" id="dataNascimento" placeholder="Informe a data de nascimneto." class="validate" th:field="*{dataNascimento}" type="text">				
+					</div>
+					<div class="col s2" sec:authorize="hasAnyRole('ROLE_SECRETARIO', 'ROLE_GERENTE')">
+						<label for="last_name">Idade:</label>
+						<input name="idade" placeholder="Informe a idade." type="number" class="validate" th:field="*{idade}">				
+					</div>
+				</div>
+				<div class="row">
+					<div class="col s12">
+						<label>Cep:</label>
+						<input name="cep" placeholder="Informe um CEP Válido." type="text" id="cep" size="10" maxlength="9" th:field="*{cep}"/>
+					</div>			
+				</div>
+				<div class="row">
+					<div class="col s6">				
+						<label>Rua:</label>
+						<input name="rua" type="text" placeholder="Informe a rua." id="rua" size="60" th:field="*{rua}"/>				
+					</div>
+					<div class="col s6">	
+						<label>Bairro:</label>		
+			            <input name="bairro" type="text" placeholder="Informe o bairro. " id="bairro" size="40" th:field="*{bairro}"/>         
+					</div>
+				</div>
+				<div class="row">
+					<div class="col s6">
+						<label>Cidade:</label>
+						<input name="cidade" type="text" placeholder="Informe a cidade." id="cidade" size="40" th:field="*{cidade}"/>				
+					</div>
+					<div class="col s6">	
+						<label>Estado:</label>		        
+				        <input name="uf" type="text" placeholder="Informe o estado." id="uf" size="2" th:field="*{estado}"/>		        
+					</div>
+				</div>
+				<div class="row">
+					<div class="col s12">		
+						<label>IBGE:</label>	
+				        <input name="ibge" type="text" placeholder="Informe o IBGE." id="ibge" size="8" th:field="*{ibge}"/>	        
+					</div>
+				</div>
+				<div class="row">
+					<div class="input-field col s4">
+						<label class="active">Sexo</label>
+						<select th:field="*{sexo}">
+							<option value="" selected>[ Selecione uma Opção ]</option>
+						 	<option value="MASCULINO" th:text="Masculino"/>
+							<option value="FEMININO"  th:text="Feminino"/>				
+						</select>
+					</div>	
+					<div class="input-field col s4">
+						<label class="active">Profissão</label>
+						<select th:field="*{profissao}">
+							<option value="" selected>[ Selecione uma Opção ]</option>	
+							<option th:each="profissao : ${profissoes}" th:value="${profissao.id}" th:text="${profissao.descricao}"/>														
+						</select>
+					</div>
+					<div class="input-field col s4">
+						<label class="active">Cargo</label>
+						<select th:field="*{cargo}">
+							<option value="" selected>[ Selecione uma Opção ]</option>	
+							<option th:each="cargo : ${T(curso.springboot.enums.Cargo).values}" th:value="${cargo}" th:text="${cargo.nome}"/>														
+						</select>
+					</div>
+				</div>
+				<div class="row">
+					<div class="input-field col s12">
+						<div class="file-field input-field">
+							<div class="btn">
+						    	<span>Currículo</span>
+						    	<input type="file" name="file" id="file">
+						  	</div>
+						  	<div class="file-path-wrapper">
+						    	<input class="file-path validate" placeholder="Selecione um arquivo..." type="text">
+						  	</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="input-field col s6">
+						<input type="submit" class="waves-effect waves-light btn">
+						<input type="reset" class="waves-effect waves-light btn" value="Limpar">
+					</div>
+				</div>
+			</form>
+		</div>
+	</fieldset>
+	
+	<br><br>
+	
+	<fieldset>
+		<legend>Filtros</legend>
+		<form method="POST" action="filtrarpessoa" id="filtrarpessoa">
+			<div class="row">
+				<div class="input-field col s6">
+					<label for="pesquisaNome" class="active">Nome</label>
+					<input name="pesquisaNome" id="pesquisaNome" type="text" th:value="${pesquisaNome}"/>
+					<input type="submit" value="PDF"    class="waves-effect waves-light btn" onclick="document.getElementById('filtrarpessoa').method = 'GET'"/>
+					<input type="submit" value="Listar" class="waves-effect waves-light btn" onclick="document.getElementById('filtrarpessoa').method = 'POST'"/>
+				</div>
+				<div class="input-field col s6">
+					<label class="active">Sexo</label>
+					<select name="pesquisaSexo">
+						<option value="" selected>[ Todos ]</option>
+						<option value="MASCULINO">Masculino</option>
+						<option value="FEMININO">Feminino</option>						
+					</select>
+				</div>
+			</div>
+		</form>
+	</fieldset>
+
+	<br />
+	<br />
+	
+	<fieldset>
+		<legend>Lista de Pessoas</legend>
+		<div class="row">
+			<div class="col s12">
+				<table class="highlight centered responsive-table">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Nome</th>
+							<th>Sobrenome</th>
+							<th>Sexo</th>
+							<th>Nascimento</th>
+							<th>Idade</th>
+							<th>CEP</th>
+							<th>Rua</th>
+							<th>Cidade</th>
+							<th>Estado</th>						
+							<th>Profissão</th>
+							<th>Cargo</th>
+							<th>Currículo</th>
+							<th>Editar</th>
+							<th>Excluir</th>
+							<th>Telefones</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="pessoa : ${pessoas.content}">
+							<td th:text="${pessoa.id}"/>
+							<td th:text="${pessoa.nome}"/>
+							<td th:text="${pessoa.sobrenome}"/>
+							<td th:text="${pessoa.sexo}"/>
+							<td th:text="${pessoa.dataNascimento}"/>
+							<td th:text="${pessoa.idade}"/>
+							<td th:text="${pessoa.cep}"/>
+							<td th:text="${pessoa.rua}"/>
+							<td th:text="${pessoa.cidade}"/>
+							<td th:text="${pessoa.estado}"/>
+							<td th:text="${pessoa.profissao.descricao}"/>
+							<td th:text="${pessoa.cargo.nome}"/>
+							<td>
+								<a th:if="${pessoa.curriculo != null}" th:href="@{/baixarcurriculo/{idPessoa}(idPessoa=${pessoa.id})}" class="waves-effect waves-light btn">Download</a>
+								<a th:if="${pessoa.curriculo == null}" disabled class="waves-effect waves-light btn">Download</a>
+							</td>
+							<td><a th:href="@{/editarpessoa/{idPessoa}(idPessoa=${pessoa.id})}" class="waves-effect waves-light btn">Editar</a></td>
+							<td><a th:href="@{/excluirpessoa/{idPessoa}(idPessoa=${pessoa.id})}" class="waves-effect waves-light btn">Excluir</a></td>
+							<td><a th:href="@{/telefones/{idPessoa}(idPessoa=${pessoa.id})}" class="waves-effect waves-light btn">Telefones</a></td>
+						</tr>
+					</tbody>
+				</table>
+				
+				<div class="row" style="margin-top: 30px;">
+					<center>				
+						<span th:if="${pessoas.hasPrevious()}">
+							<a th:href="@{/listapaginacao(page = ${pessoas.number - 1}, size = ${pessoas.size}, pesquisaNome = ${pesquisaNome})}">Anterior</a>
+						</span>
+					
+						<th:block th:each="i: ${#numbers.sequence(0, pessoas.totalPages - 1)}">
+							<a th:href="@{/listapaginacao(page = ${i}, size = ${pessoas.size}, pesquisaNome = ${pesquisaNome})}">[[ ${i} + 1 ]]</a>
+						</th:block>
+						
+						<span th:if="${pessoas.hasNext()}">
+							<a th:href="@{/listapaginacao(page = ${pessoas.number + 1}, size = ${pessoas.size}, pesquisaNome = ${pesquisaNome})}">Próximo</a>
+						</span>										
+					</center>			
+				</div>			
+				
+			</div>
+		</div>
+	</fieldset>
+	
+	<br>
+	<!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>	
+</body>
+
+</html>

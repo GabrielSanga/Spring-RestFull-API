@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Pagina Spring</title>
+
+	<!--Import Google Icon Font-->
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<!-- Compiled and minified CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">   
+
+</head>
+
+<body>
+	<h3> Cadatro de Usuário </h3>
+	<form action="SalvarUsuario" method="POST">
+	
+		<label>ID:</label><input name="id" id="id" type="text"/ readonly>
+		<label>Login:</label><input name="login" id="login" type="text" required/>
+		<label>Senha:</label><input name="senha" id="senha" type="password" required/>
+		
+		<input type="submit" value="Salvar" name="salvar" class="waves-effect waves-light btn"/>
+	</form>
+	
+	<!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>	
+</body>
+
+</html>
