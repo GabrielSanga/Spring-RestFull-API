@@ -77,7 +77,7 @@ public class PessoaController {
 						
 			return modelView;
 		}
-		//Seta os telefones no objeto de pessoa (para evitar erros no momento de persistir no BD)
+		//Seta os telefones no objeto de pessoa (para evitar erros no momento de persistir no BD teste)
 		pessoa.setTelefones(telefoneRepository.TelefonesPessoa(pessoa.getId()));
 		
 		//Caso venha um arquivo(currículo) do formulário, adiciona na pessoa
